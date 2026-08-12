@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 
+	"bank-ledger/internal/api"
+	"bank-ledger/internal/config"
 	"bank-ledger/internal/db"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,11 +15,9 @@ import (
 func main() {
 	ctx := context.Background()
 
-	pool, err := pgxpool.New(
-		ctx,
-		"postgresql://postgres:postgres@localhost:5432/bank_ledger?sslmode=disable",
-	)
+	cfg := config.Load()
 
+	pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
 	if err != nil {
 		fmt.Println("Failed to create pool:", err)
 		return
@@ -24,15 +25,21 @@ func main() {
 
 	defer pool.Close()
 
-	err = pool.Ping(ctx)
-
-	if err != nil {
+	if err := pool.Ping(ctx); err != nil {
 		fmt.Println("Failed to connect to PostgreSQL:", err)
 		return
 	}
 
 	store := db.NewStore(pool)
 
-	fmt.Println("Connected to PostgreSQL")
-	fmt.Println(store)
+	_ = store
+
+	server := api.NewServer()
+
+	fmt.Println("Server running on :8080")
+
+	err = http.ListenAndServe(":8080", server.Handler())
+	if err != nil {
+		fmt.Println("Server error:", err)
+	}
 }
