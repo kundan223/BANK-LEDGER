@@ -34,7 +34,7 @@ func main() {
 
 	_ = store
 
-	server := api.NewServer()
+	server := api.NewServer(store)
 
 	fmt.Println("Server running on :8080")
 

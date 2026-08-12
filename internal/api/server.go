@@ -2,14 +2,18 @@ package api
 
 import (
 	"net/http"
+
+	"bank-ledger/internal/db"
 )
 
 type Server struct {
+	store  *db.Store
 	router *http.ServeMux
 }
 
-func NewServer() *Server {
+func NewServer(store *db.Store) *Server {
 	server := &Server{
+		store:  store,
 		router: http.NewServeMux(),
 	}
 
