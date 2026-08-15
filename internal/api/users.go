@@ -5,11 +5,19 @@ import (
 	"net/http"
 
 	"bank-ledger/internal/db"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type createUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type userResponse struct {
+	ID        int64  `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
 }
 
 func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
@@ -21,11 +29,21 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	passwordHash, err := bcrypt.GenerateFromPassword(
+		[]byte(req.Password),
+		bcrypt.DefaultCost,
+	)
+
+	if err != nil {
+		http.Error(w, "failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
 	user, err := s.store.CreateUser(
 		r.Context(),
 		db.CreateUserParams{
 			Email:        req.Email,
-			PasswordHash: req.Password,
+			PasswordHash: string(passwordHash),
 		},
 	)
 
@@ -36,5 +54,11 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	json.NewEncoder(w).Encode(user)
+	response := userResponse{
+		ID:        user.ID,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+	}
+
+	json.NewEncoder(w).Encode(response)
 }

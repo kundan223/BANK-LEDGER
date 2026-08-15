@@ -24,6 +24,7 @@ func NewServer(store *db.Store) *Server {
 
 func (s *Server) setupRoutes() {
 	s.router.HandleFunc("GET /health", s.health)
+	s.router.HandleFunc("POST /users", s.createUser)
 }
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
