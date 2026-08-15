@@ -8,6 +8,7 @@ import (
 	"bank-ledger/internal/api"
 	"bank-ledger/internal/config"
 	"bank-ledger/internal/db"
+	"bank-ledger/internal/service"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -29,12 +30,9 @@ func main() {
 		fmt.Println("Failed to connect to PostgreSQL:", err)
 		return
 	}
-
 	store := db.NewStore(pool)
-
-	_ = store
-
-	server := api.NewServer(store)
+	userService := service.NewUserService(store)
+	server := api.NewServer(store, userService)
 
 	fmt.Println("Server running on :8080")
 

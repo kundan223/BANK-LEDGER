@@ -4,17 +4,23 @@ import (
 	"net/http"
 
 	"bank-ledger/internal/db"
+	"bank-ledger/internal/service"
 )
 
 type Server struct {
-	store  *db.Store
-	router *http.ServeMux
+	store       *db.Store
+	userService *service.UserService
+	router      *http.ServeMux
 }
 
-func NewServer(store *db.Store) *Server {
+func NewServer(
+	store *db.Store,
+	userService *service.UserService,
+) *Server {
 	server := &Server{
-		store:  store,
-		router: http.NewServeMux(),
+		store:       store,
+		userService: userService,
+		router:      http.NewServeMux(),
 	}
 
 	server.setupRoutes()

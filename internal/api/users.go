@@ -3,10 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-
-	"bank-ledger/internal/db"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type createUserRequest struct {
@@ -29,22 +25,10 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword(
-		[]byte(req.Password),
-		bcrypt.DefaultCost,
-	)
-
-	if err != nil {
-		http.Error(w, "failed to hash password", http.StatusInternalServerError)
-		return
-	}
-
-	user, err := s.store.CreateUser(
+	user, err := s.userService.CreateUser(
 		r.Context(),
-		db.CreateUserParams{
-			Email:        req.Email,
-			PasswordHash: string(passwordHash),
-		},
+		req.Email,
+		req.Password,
 	)
 
 	if err != nil {
