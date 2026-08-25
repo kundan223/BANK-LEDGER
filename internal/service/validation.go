@@ -1,28 +1,34 @@
 package service
 
 import (
+	"errors"
 	"strings"
-	"error "
-
 )
 
-func ValidateEmail(email string) error {
+const minPasswordLength = 8
+
+func validateEmail(email string) error {
+	email = strings.TrimSpace(email)
+
 	if email == "" {
-		return errors.New("email can not be empty")
+		return errors.New("email is required")
 	}
 
-	if !strings.contains(email,"@"){
-		return errors.New("enter a valid email address or give the full email address with @")
+	if !strings.Contains(email, "@") {
+		return errors.New("invalid email")
 	}
-	return nil 
-}	
 
-fucn ValidatePassword(password string) error {
+	return nil
+}
+
+func validatePassword(password string) error {
 	if password == "" {
-		return errors.New("password can not be empty")
+		return errors.New("password is required")
 	}
-	if len(password) < 8 {
-		return errors.New("password must be at least 8 characters long")
+
+	if len(password) < minPasswordLength {
+		return errors.New("password must be at least 8 characters")
 	}
-	return null
+
+	return nil
 }

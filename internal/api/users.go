@@ -2,7 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+
+	"bank-ledger/internal/service"
 )
 
 type createUserRequest struct {
@@ -20,8 +23,13 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	var req createUserRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
+
 	if err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid request body",
+		)
 		return
 	}
 
@@ -32,16 +40,33 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		if errors.Is(err, service.ErrEmailAlreadyExists) {
+			writeError(
+				w,
+				http.StatusConflict,
+				"email already exists",
+			)
+			return
+		}
+
+		writeError(
+			w,
+			http.StatusBadRequest,
+			err.Error(),
+		)
+
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
 	response := userResponse{
-		ID:        user.ID,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+		ID:    user.ID,
+		Email: user.Email,
+		CreatedAt: user.CreatedAt.Time.Format(
+			"2006-01-02T15:04:05Z07:00",
+		),
 	}
 
 	json.NewEncoder(w).Encode(response)

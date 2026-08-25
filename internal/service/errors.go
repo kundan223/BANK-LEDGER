@@ -1,8 +1,5 @@
 package service
 
-import (
-	"errors" )
+import "errors"
 
-var EmailAlreadyExistsError = errors.New("email already exists")
-
-var SomeError = errors.New("some error occurred")
+var ErrEmailAlreadyExists = errors.New("email already exists")

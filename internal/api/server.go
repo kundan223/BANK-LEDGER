@@ -31,6 +31,7 @@ func NewServer(
 func (s *Server) setupRoutes() {
 	s.router.HandleFunc("GET /health", s.health)
 	s.router.HandleFunc("POST /users", s.createUser)
+	s.router.HandleFunc("POST /login", s.login)
 }
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
